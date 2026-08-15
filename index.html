@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BuyIntent AI - Buyer-Intent Discovery Engine</title>
+    <meta name="description" content="AI Customer-Finding and Buyer-Intent Engine that finds high-intent prospects based on real-time event signals." />
+    <meta property="og:title" content="BuyIntent AI" />
+    <meta property="og:description" content="Event-driven buyer intent & customer discovery engine." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      // Defensive safeguard for sandboxed iframe environments where fetch descriptor might be read-only or getter-only
+      try {
+        if (typeof window !== 'undefined') {
+          const originalFetch = window.fetch ? window.fetch.bind(window) : fetch;
+          let currentFetch = originalFetch;
+          try {
+            Object.defineProperty(window, 'fetch', {
+              get() {
+                return currentFetch;
+              },
+              set(newFetch) {
+                currentFetch = newFetch;
+              },
+              configurable: true,
+              enumerable: true
+            });
+          } catch (_) {}
+        }
+      } catch (_) {}
+    </script>
+  </head>
+  <body class="bg-slate-100 antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

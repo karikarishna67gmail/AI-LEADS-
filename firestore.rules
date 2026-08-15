@@ -1,0 +1,93 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserProfile(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 150;
+    }
+
+    function isValidCampaign(data, userId) {
+      return data.campaignName is string && data.campaignName.size() > 0 && data.campaignName.size() <= 150 &&
+             data.productName is string && data.productName.size() > 0 && data.productName.size() <= 150 &&
+             data.userId == userId;
+    }
+
+    function isValidProspect(data, userId) {
+      return data.companyName is string && data.companyName.size() > 0 && data.companyName.size() <= 200 &&
+             data.intentTier is string && (data.intentTier == 'very_hot' || data.intentTier == 'hot' || data.intentTier == 'warm' || data.intentTier == 'cold') &&
+             data.primarySignal is string && data.primarySignal.size() <= 500 &&
+             data.userId == userId;
+    }
+
+    function isValidSearch(data, userId) {
+      return data.campaignName is string && data.campaignName.size() > 0 && data.campaignName.size() <= 150 &&
+             data.userId == userId;
+    }
+
+    // User Profile
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming());
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming());
+      allow delete: if isOwner(userId);
+
+      // User Campaigns Subcollection
+      match /campaigns/{campaignId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(campaignId) && isValidCampaign(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(campaignId) && isValidCampaign(incoming(), userId) && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId);
+      }
+
+      // User Discovered Prospects Subcollection
+      match /prospects/{prospectId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(prospectId) && isValidProspect(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(prospectId) && isValidProspect(incoming(), userId) && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId);
+      }
+
+      // User Search History Subcollection
+      match /searches/{searchId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(searchId) && isValidSearch(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(searchId) && isValidSearch(incoming(), userId) && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // Connection Healthcheck collection
+    match /test/{docId} {
+      allow read: if true;
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "BuyIntent AI",
+  "description": "AI Customer-Finding and Buyer-Intent Engine that finds high-intent prospects based on real-time event signals, scores readiness, and crafts hyper-personalized outreach pitches.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

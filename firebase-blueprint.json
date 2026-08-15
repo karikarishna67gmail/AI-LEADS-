@@ -1,0 +1,122 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with workspace details and quotas",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique user ID" },
+        "name": { "type": "string", "description": "User display name", "maxLength": 100 },
+        "email": { "type": "string", "format": "email", "description": "User email" },
+        "organization": { "type": "string", "description": "Company name", "maxLength": 100 },
+        "role": { "type": "string", "description": "User role", "maxLength": 100 },
+        "tier": { "type": "string", "enum": ["starter", "growth", "scale"], "description": "Subscription tier" },
+        "searchesRemaining": { "type": "number", "description": "Remaining searches" },
+        "searchesTotal": { "type": "number", "description": "Total allotted searches" },
+        "monthlyLeadQuota": { "type": "number", "description": "Monthly leads quota" },
+        "leadsUsedThisMonth": { "type": "number", "description": "Leads used this month" },
+        "onboardingCompleted": { "type": "boolean", "description": "Whether onboarding is complete" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "email"]
+    },
+    "Campaign": {
+      "title": "Campaign",
+      "description": "ICP Settings and Campaign Search Configuration",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Campaign unique ID" },
+        "userId": { "type": "string", "description": "Owner user ID" },
+        "campaignName": { "type": "string", "maxLength": 150 },
+        "productName": { "type": "string", "maxLength": 150 },
+        "productDescription": { "type": "string", "maxLength": 1000 },
+        "category": { "type": "string", "maxLength": 100 },
+        "targetAudience": { "type": "string", "maxLength": 300 },
+        "industry": { "type": "string", "maxLength": 200 },
+        "location": { "type": "string", "maxLength": 200 },
+        "minDealValue": { "type": "number" },
+        "maxDealValue": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "keywords": { "type": "array", "description": "Search keyword triggers" },
+        "enabledSignals": { "type": "array", "description": "Signals to monitor" },
+        "status": { "type": "string", "enum": ["active", "paused", "draft"] },
+        "leadCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "campaignName", "productName"]
+    },
+    "ProspectLead": {
+      "title": "ProspectLead",
+      "description": "Discovered high-intent prospect lead with signal audit and outreach",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string", "description": "Owner user ID" },
+        "campaignId": { "type": "string" },
+        "companyName": { "type": "string", "maxLength": 200 },
+        "website": { "type": "string", "maxLength": 300 },
+        "industry": { "type": "string", "maxLength": 150 },
+        "location": { "type": "string", "maxLength": 200 },
+        "intentTier": { "type": "string", "enum": ["very_hot", "hot", "warm", "cold"] },
+        "signalType": { "type": "string" },
+        "primarySignal": { "type": "string", "maxLength": 500 },
+        "inferredOpportunity": { "type": "string", "maxLength": 1000 },
+        "recommendedOffer": { "type": "string", "maxLength": 500 },
+        "estimatedDealValue": { "type": "string", "maxLength": 100 },
+        "pipelineStage": { "type": "string" },
+        "notes": { "type": "string", "maxLength": 4000 },
+        "isSaved": { "type": "boolean" },
+        "isDemo": { "type": "boolean" },
+        "intentScores": { "type": "object" },
+        "evidence": { "type": "array" },
+        "decisionMaker": { "type": "object" },
+        "outreachDrafts": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "companyName", "intentTier", "primarySignal"]
+    },
+    "SearchRun": {
+      "title": "SearchRun",
+      "description": "History log of market intent discovery search runs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "campaignId": { "type": "string" },
+        "campaignName": { "type": "string", "maxLength": 150 },
+        "queriesGenerated": { "type": "array" },
+        "prospectsFound": { "type": "number" },
+        "veryHotCount": { "type": "number" },
+        "hotCount": { "type": "number" },
+        "warmCount": { "type": "number" },
+        "coldCount": { "type": "number" },
+        "searchProvider": { "type": "string" },
+        "durationMs": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "campaignName"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile with plan details and private settings"
+    },
+    "/users/{userId}/campaigns/{campaignId}": {
+      "schema": "Campaign",
+      "description": "User ICP campaigns and discovery configurations"
+    },
+    "/users/{userId}/prospects/{prospectId}": {
+      "schema": "ProspectLead",
+      "description": "Discovered prospects, pipeline stages, notes, and AI outreach drafts"
+    },
+    "/users/{userId}/searches/{searchId}": {
+      "schema": "SearchRun",
+      "description": "Execution log of customer discovery search batches"
+    }
+  }
+}
